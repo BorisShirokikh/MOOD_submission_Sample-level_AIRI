@@ -116,8 +116,17 @@ def main():
 
         else:  # mode == 'sample':
             embeddings = load_embeddings(data, args.local)
-            scores = min_max_scale(np.float32([get_ood_score(fname, path_inp, data, embeddings, n_bins=n_bins)
-                                               for fname in tqdm(fnames)]))
+            scores = []
+            for fname in tqdm(fnames):
+                try:
+                    scores.append(get_ood_score(fname, path_inp, data, embeddings, n_bins=n_bins))
+                except Exception:
+                    if scores:
+                        scores.append(min(scores))
+                    else:
+                        scores.append(0)
+            scores = min_max_scale(np.float32(scores))
+
             for score, fname in zip(scores, fnames):
                 with open(str(path_out / (fname + '.txt')), 'w') as wf:
                     wf.write(str(score))
