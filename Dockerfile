@@ -5,13 +5,13 @@ RUN apt-get update && apt-get install -y \
 
 # paths
 RUN mkdir /workspace
-RUN mkdir /workspace/embeddings
+RUN mkdir /workspace/resources
 
 RUN mkdir /mnt/data
 RUN mkdir /mnt/pred
 
 ADD scripts /workspace/
-ADD embeddings /workspace/embeddings/
+ADD resources /workspace/resources/
 
 RUN chmod +x /workspace/*.sh
 
@@ -24,9 +24,13 @@ RUN rm ./miniconda.sh
 ENV PATH="/miniconda3/bin:${PATH}"
 RUN conda install -y python=3.10
 
+RUN pip install joblib
 RUN pip install numpy
 RUN pip install nibabel
+RUN pip install imops
+# imops silently requires skimage:(((
+RUN pip install scikit-image
+RUN pip install scikit-learn
 RUN pip install tqdm
-RUN pip install scipy
 
 ENTRYPOINT ["/bin/bash"]
